@@ -25,8 +25,6 @@ class BackTesting():
                     
     def fit(self, start, end, rebal_month = None):
         self.first = True
-        start = start.replace('-','')
-        end = end.replace('-','')
         if rebal_month == None:
             self.section_start = start
             stocks_ratio = self.strategy_class.fit(self)

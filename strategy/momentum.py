@@ -3,7 +3,7 @@ import numpy as np
 
 
 class dual_momentum():
-    def __init__(self, min_rate_of_return = 0.02, time_period = 6, stocks = ['A143850','A195930','A101280','A069500']):
+    def __init__(self, min_rate_of_return = 0.02, time_period = 12, stocks = ['A143850','A195930','A101280','A069500']):
         #stocks = S&P500 etf, 유로스탁스 etf, topix etf, kospi200 etf
         self.stocks = stocks
         self.min_rate_of_return = min_rate_of_return
