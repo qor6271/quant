@@ -27,11 +27,11 @@
     3. 누락 데이터 많음(이건 기업이 안올린 거라 어쩔 수 없는듯)
     -> 아직 사용하지 않는다. 나중에 가치투자를 한다면 해결해야 할 과제 중 하나.
     
-# 2. backtest(백테스팅 라이브러리)
+# 2. regular_backtesting(규칙적으로 리밸런싱하는 백테스팅 라이브러리)
 
 ## Backtest.py
 
-### class BackTesting(price_df, strategy_class, seed_money = 10000000)
+### class regular_Backtest(price_df, strategy_class, seed_money = 10000000)
 
 변수 설명
 
@@ -71,10 +71,6 @@
     2. strategy_class의 전략에 맞게 투자할 주식과 그 주식들의 비율을 전달받음
     3. 전달받은 데이터를 make_balance 함수에 넣어 다음 리밸런싱 전까지 투자내용들을 balance에 저장
     4. 2,3 과정을 rebal_month기준으로 끝날때까지 반복
-
-
-
-# 3. strategy(퀀트 전략 라이브러리)
 
 ## basic.py
 
@@ -173,6 +169,12 @@ ex : 4개 etf(기본값)를 대상으로 지난 12월간 수익률이 가장 높
     가치투자를 위해 만든 라이브러리지만, 재무제표가 불완전한 관계로 보류
 
 
+# 3. irregular_backtesting(불규칙적으로 리밸런싱하는 백테스팅 라이브러리)
+
+## Backtest.py
+
+수정예정
 
 
+------
 그밖에 파일들은 내가 여러가지 테스트 해본 것들이니 알아서 보도록 bollinger_test, ema130_test는 볼린저 밴드, 이동평균선 공부하면서 끄적인거 나중에 라이브러리로 개발 예정
