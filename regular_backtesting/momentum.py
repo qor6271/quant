@@ -19,8 +19,8 @@ class dual_momentum():
             past_one_month = str(int(present) - 89)
         else:
             past_one_month = str(int(present) - 1)
-        past_price = test_class.price_df['closing_price'][self.stocks][past_six_month:].iloc[0]
-        present_price = test_class.price_df['closing_price'][self.stocks][past_one_month:].iloc[0]
+        past_price = test_class.price_df['close'][self.stocks][past_six_month:].iloc[0]
+        present_price = test_class.price_df['close'][self.stocks][past_one_month:].iloc[0]
 
         if max((present_price - past_price) / past_price) > self.min_rate_of_return:
             return [[((present_price - past_price) / past_price).idxmax()], [1]]
@@ -38,11 +38,11 @@ class relative_momentum():
         self.last_month_in = last_month_in
 
     def actual_investment(self, start, end, price_df):
-        actual_closing_price = price_df['closing_price'][self.stocks][start:end]
+        actual_closing_price = price_df['close'][self.stocks][start:end]
         actual_rate_of_return = (actual_closing_price.iloc[-1] - actual_closing_price.iloc[0]) / actual_closing_price.iloc[0]
         actual_momentum_stock = actual_rate_of_return.sort_values(ascending=False).dropna().iloc[:self.momentum_number].index
         if self.fip_on == True:
-            actual_market_price = price_df['market_price'][self.stocks][start:end]
+            actual_market_price = price_df['open'][self.stocks][start:end]
             actual_date_rate = np.sign(actual_closing_price - actual_market_price)
             actual_fip = - np.sign(actual_closing_price.iloc[-1] - actual_closing_price.iloc[0]) * actual_date_rate.sum()
             actual_momentum_stock = actual_fip.loc[actual_momentum_stock].sort_values().iloc[:self.fip_number].index
@@ -67,12 +67,12 @@ class relative_momentum():
         else:
             temp_index = -2
             
-        self.closing_price = test_class.price_df['closing_price'][self.stocks][self.past_date_section[0]:self.past_date_section[temp_index]]
+        self.closing_price = test_class.price_df['close'][self.stocks][self.past_date_section[0]:self.past_date_section[temp_index]]
         self.rate_of_return_past = (self.closing_price.iloc[-1] - self.closing_price.iloc[0]) / self.closing_price.iloc[0]
         momentum_stock = self.rate_of_return_past.sort_values(ascending=False).dropna().iloc[:self.momentum_number].index
 
         if self.fip_on == True:
-            self.market_price = test_class.price_df['market_price'][self.stocks][self.past_date_section[0]:self.past_date_section[temp_index]]
+            self.market_price = test_class.price_df['open'][self.stocks][self.past_date_section[0]:self.past_date_section[temp_index]]
             self.date_rate = np.sign(self.closing_price - self.market_price)
             self.fip = - np.sign(self.closing_price.iloc[-1] - self.closing_price.iloc[0]) * self.date_rate.sum()
             momentum_stock = self.fip.loc[momentum_stock].sort_values().iloc[:self.fip_number].index
@@ -109,7 +109,7 @@ class relative_momentum_test():
             temp_index = -2
         
 
-        self.closing_price = test_class.price_df['closing_price'][self.stocks][self.past_date_section[0]:self.past_date_section[temp_index]]
+        self.closing_price = test_class.price_df['close'][self.stocks][self.past_date_section[0]:self.past_date_section[temp_index]]
         self.rate_of_return_past = (self.closing_price.iloc[-1] - self.closing_price.iloc[0]) / self.closing_price.iloc[0]
         self.rate_of_return_past.dropna(inplace=True)
         self.qcut = pd.qcut(self.rate_of_return_past, self.section_cut, labels=[self.section_cut - i for i in range(self.section_cut)])

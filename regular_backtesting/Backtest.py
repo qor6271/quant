@@ -64,7 +64,7 @@ class regular_Backtest():
 
         return self
 
-    def make_balance(self, stocks_ratio, start, end, input_money, price_basis = 'closing_price'):
+    def make_balance(self, stocks_ratio, start, end, input_money, price_basis = 'close'):
         market_price = self.price_df[price_basis][stocks_ratio[0]][start:end]
         money_property = list(map(lambda x: x * input_money, stocks_ratio[1]))
         stock_amount = money_property // market_price.iloc[0]

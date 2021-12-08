@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 
 class single_Backtest():
-    def __init__(self, price_df, stock, buy_estimators, sell_estimators, seed_money = 10000000, trading_timing = 'closing_price', stop_loss=-1, breakout_buy = False):
-        # trading_timing = 'closing_price'
+    def __init__(self, price_df, stock, buy_estimators, sell_estimators, seed_money = 10000000, trading_timing = 'close', stop_loss=-1, breakout_buy = False):
+        # trading_timing = 'close'
         # stop_loss : 고점대비 수익률 얼마일때 손절할지
         # breakout_buy : 전일 고점 돌파할 경우 매수
 
@@ -30,7 +30,7 @@ class single_Backtest():
             self.stock_number = self.balance['cash'][yesterday] // self.price_single[self.trading_timing][today]
             self.balance['stock'][today] = self.price_single[self.trading_timing][today] * self.stock_number
             self.balance['cash'][today] = self.balance['cash'][yesterday] - self.balance['stock'][today]
-            self.high_price = self.price_single['high_price'][today]
+            self.high = self.price_single['high'][today]
             
         elif form == 'sell':
             temp_cash = self.price_single[self.trading_timing][today] * self.stock_number
@@ -43,7 +43,7 @@ class single_Backtest():
                 self.balance['stock'][today] = 0
             else:    
                 self.balance['stock'][today] = self.price_single[self.trading_timing][today] * self.stock_number
-                self.high_price = max(self.high_price, self.price_single['high_price'][today])
+                self.high = max(self.high, self.price_single['high'][today])
             self.balance['cash'][today] = self.balance['cash'][yesterday]
 
         self.balance['total'][today] = self.balance['cash'][today] + self.balance['stock'][today]
@@ -58,11 +58,11 @@ class single_Backtest():
         self.balance = pd.DataFrame(columns = ['cash','stock','total'], index = self.price_single.loc[start:end].index)
         self.balance.iloc[0] = [self.seed_money,0,self.seed_money]
         self.stock_number = 0
-        self.high_price = 1
+        self.high = 1
         for idx, today in enumerate(self.balance.index[1:], start=1):
             yesterday = self.balance.index[idx-1]
             if self.breakout_buy == True:
-                buy_condition = self.price_single['high_price'][yesterday] < self.price_single['high_price'][today]
+                buy_condition = self.price_single['high'][yesterday] < self.price_single['high'][today]
             elif self.breakout_buy == False:
                 buy_condition = 1
             sell_condition = 1
@@ -76,7 +76,7 @@ class single_Backtest():
                 sell_condition *= sell.condition(yesterday)
             if buy_condition and self.stock_number == 0:
                 self.make_balance(yesterday, today, 'buy')
-            elif (sell_condition or (self.price_single['low_price'][yesterday]/self.high_price - 1 < self.stop_loss)) and self.stock_number != 0:
+            elif (sell_condition or (self.price_single['low'][yesterday]/self.high - 1 < self.stop_loss)) and self.stock_number != 0:
                 self.make_balance(yesterday, today, 'sell')
             else:
                 self.make_balance(yesterday, today, 'keep')

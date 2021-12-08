@@ -11,6 +11,6 @@ class ratio_adjustment():
 
 
 def rate_of_return(start, end, price_df, code):
-    code_price = price_df['closing_price'][code][start:end]
+    code_price = price_df['close'][code][start:end]
     return code_price / code_price[0] - 1
     

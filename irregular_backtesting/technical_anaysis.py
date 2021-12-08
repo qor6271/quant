@@ -15,9 +15,9 @@ class moving_average():
         if self.first == False:
             self.first = True
             if self.criterion == 'simple':
-                self.ma = price_df['closing_price'].rolling(window=self.period).mean()
+                self.ma = price_df['close'].rolling(window=self.period).mean()
             elif self.criterion == 'exponential':
-                self.ma = price_df['closing_price'].ewm(span=self.period).mean()
+                self.ma = price_df['close'].ewm(span=self.period).mean()
             
     def condition(self, date):
         if self.param[1] == 'up':
@@ -38,9 +38,9 @@ class stochastic():
     def default_setting(self, price_df):
         if self.first == False:
             self.first = True
-            ndays_high = price_df['high_price'].rolling(window=self.period, min_periods=1).max()
-            ndays_low = price_df['low_price'].rolling(window=self.period, min_periods=1).min()
-            fast_k = (price_df['closing_price'] - ndays_low) / (ndays_high - ndays_low) * 100
+            ndays_high = price_df['high'].rolling(window=self.period, min_periods=1).max()
+            ndays_low = price_df['low'].rolling(window=self.period, min_periods=1).min()
+            fast_k = (price_df['close'] - ndays_low) / (ndays_high - ndays_low) * 100
             if self.criterion == 'K':
                 self.sto = fast_k
             elif self.criterion == 'D':
@@ -62,9 +62,9 @@ class intraday_intensity():
     def default_setting(self, price_df):
         if self.first == False:
             self.first = True
-            II = (2 * price_df['closing_price'] - price_df['high_price'] - price_df['low_price']) \
-                / (price_df['high_price'] - price_df['low_price']) * price_df['trading_volume']
-            self.IIP = II.rolling(window=21).sum() / price_df['trading_volume'].rolling(window=21).sum() * 100
+            II = (2 * price_df['close'] - price_df['high'] - price_df['low']) \
+                / (price_df['high'] - price_df['low']) * price_df['volume']
+            self.IIP = II.rolling(window=21).sum() / price_df['volume'].rolling(window=21).sum() * 100
 
 
     
@@ -84,15 +84,15 @@ class money_flow_index():
     def default_setting(self, price_df):
         if self.first == False:
             self.first = True
-            TP = (price_df['high_price'] + price_df['low_price'] + price_df['closing_price']) / 3
+            TP = (price_df['high'] + price_df['low'] + price_df['close']) / 3
             PMF = pd.DataFrame(index=price_df.index, columns=['stock'])
             NMF = pd.DataFrame(index=price_df.index, columns=['stock'])
             for i in range(len(price_df) - 1):
                 if TP.values[i] < TP.values[i+1]:
-                    PMF['stock'].values[i+1] = TP.values[i+1] * price_df['trading_volume'].values[i+1]
+                    PMF['stock'].values[i+1] = TP.values[i+1] * price_df['volume'].values[i+1]
                     NMF['stock'].values[i+1] = 0
                 else:
-                    NMF['stock'].values[i+1] = TP.values[i+1] * price_df['trading_volume'].values[i+1]
+                    NMF['stock'].values[i+1] = TP.values[i+1] * price_df['volume'].values[i+1]
                     PMF['stock'].values[i+1] = 0
             MFR = PMF['stock'].rolling(window=10).sum() / NMF['stock'].rolling(window=10).sum()
             self.MFI = 100 - 100 / (1 + MFR)
@@ -113,11 +113,11 @@ class bollinger_percent():
     def default_setting(self, price_df):
         if self.first == False:
             self.first = True
-            MA20 = price_df['closing_price'].rolling(window=20).mean()
-            stddev = price_df['closing_price'].rolling(window=20).std()
+            MA20 = price_df['close'].rolling(window=20).mean()
+            stddev = price_df['close'].rolling(window=20).std()
             upper = MA20 + stddev * 2
             lower = MA20 - stddev * 2
-            self.PB = (price_df['closing_price'] - lower) / (upper - lower)
+            self.PB = (price_df['close'] - lower) / (upper - lower)
             
     def condition(self, date):
         if self.param[1] == 'up':
