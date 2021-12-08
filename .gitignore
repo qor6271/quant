@@ -2,8 +2,7 @@
 .DS_Store
 
 # ignore __pycache__
-__pycache__/
-*.py[cod]
+__pycache__
 
 # ignore price csv file
 data_directory/*_price.csv
@@ -12,4 +11,4 @@ data_directory/*_price.csv
 upbit_api_key.py
 
 # ignore upbit
-upbit_test.ipynb
+pyupbit_guide.ipynb
