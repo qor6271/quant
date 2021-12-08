@@ -10,5 +10,3 @@ data_directory/*_price.csv
 # ignore api_key
 upbit_api_key.py
 
-# ignore upbit
-pyupbit_guide.ipynb
