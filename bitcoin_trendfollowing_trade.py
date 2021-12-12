@@ -16,13 +16,11 @@ def get_ohlcv(ticker):
     return df
 
 def get_start_time(ticker):
-    """시작 시간 조회"""
     df = pyupbit.get_ohlcv(ticker, interval="day", count=1)
     start_time = df.index[0]
     return start_time
 
 def get_balance(ticker):
-    """잔고 조회"""
     balances = upbit.get_balances()
     for b in balances:
         if b['currency'] == ticker:
@@ -91,19 +89,19 @@ class bollinger_percent():
             return self.PB[date] < self.param[0]
 
 
-# 로그인
 upbit = pyupbit.Upbit(access_key, secret_key)
 print("autotrade start")
-post_message(myToken, '#coin', '자동매매 시작')
+post_message(myToken, '#coin', 'autotrade start')
 
-# 자동매매 시작
+start_time = datetime.datetime.now()
+
 while True:
     try:
         now = datetime.datetime.now()
-        start_time = get_start_time("KRW-BTC")
-        end_time = start_time + datetime.timedelta(days=1)
+        new_time = get_start_time("KRW-BTC")
 
-        if start_time < now < start_time + datetime.timedelta(seconds=10):
+        if start_time != new_time:
+            start_time = new_time
             krw = get_balance('KRW')
             if krw > 5000:
                 df = get_ohlcv('KRW-BTC')
@@ -114,12 +112,11 @@ while True:
                 if buy_bp.condition(date=start_time - datetime.timedelta(days=1)) and buy_mfi.condition(date=start_time - datetime.timedelta(days=1)):
                     upbit.buy_market_order("KRW-BTC", krw*0.9995)
                     high_price = pyupbit.get_current_price('KRW-BTC')
-                    post_message(myToken, '#coin', '매수 완료')
+                    post_message(myToken, '#coin', 'buying complete')
                     time.sleep(1)
                     krw_new = get_balance("KRW")
                     btc_new = get_balance('BTC')
-                    post_message(myToken, '#coin', f'현재 잔고 KRW : {krw_new}, BTC : {btc_new}')
-            time.sleep(10)
+                    post_message(myToken, '#coin', f'balance KRW : {krw_new}, BTC : {btc_new}')
         
         btc = get_balance('BTC')
         if btc > 0.00008:
@@ -127,12 +124,12 @@ while True:
             high_price = max(high_price, new_price)
             if high_price * 0.8 > new_price:
                 upbit.sell_market_order("KRW-BTC", btc)
-                post_message(myToken, '#coin', '매도 완료')
+                post_message(myToken, '#coin', 'selling complete')
                 time.sleep(1)
                 krw_new = get_balance("KRW")
                 btc_new = get_balance('BTC')
-                post_message(myToken, '#coin', f'현재 잔고 KRW : {krw_new}, BTC : {btc_new}')
+                post_message(myToken, '#coin', f'balance KRW : {krw_new}, BTC : {btc_new}')
         time.sleep(1)
     except Exception as e:
-        post_message(myToken, f'#coin','error\n에러내용: {e}')
+        post_message(myToken, f'#coin','error : {e}')
         time.sleep(1)
