@@ -54,19 +54,18 @@ class stochastic():
 
 
 class intraday_intensity():
-    def __init__(self, param):
+    def __init__(self, param, period=21):
         # param = [IIP_values, up or down] ,  IIP_values: -1~1
         self.param = param
         self.first = False
+        self.period = period
 
     def default_setting(self, price_df):
         if self.first == False:
             self.first = True
             II = (2 * price_df['close'] - price_df['high'] - price_df['low']) \
                 / (price_df['high'] - price_df['low']) * price_df['volume']
-            self.IIP = II.rolling(window=21).sum() / price_df['volume'].rolling(window=21).sum() * 100
-
-
+            self.IIP = II.rolling(window=self.period).sum() / price_df['volume'].rolling(window=self.period).sum() * 100
     
     def condition(self, date):
         if self.param[1] == 'up':
@@ -76,10 +75,11 @@ class intraday_intensity():
 
 
 class money_flow_index():
-    def __init__(self, param):
+    def __init__(self, param, period=10):
         # param = [MFI_values, up or down] ,  MFI_values: 0~100
         self.param = param
         self.first = False
+        self.period = period
 
     def default_setting(self, price_df):
         if self.first == False:
@@ -94,7 +94,7 @@ class money_flow_index():
                 else:
                     NMF['stock'].values[i+1] = TP.values[i+1] * price_df['volume'].values[i+1]
                     PMF['stock'].values[i+1] = 0
-            MFR = PMF['stock'].rolling(window=10).sum() / NMF['stock'].rolling(window=10).sum()
+            MFR = PMF['stock'].rolling(window=self.period).sum() / NMF['stock'].rolling(window=self.period).sum()
             self.MFI = 100 - 100 / (1 + MFR)
     
     def condition(self, date):
@@ -105,22 +105,35 @@ class money_flow_index():
 
 
 class bollinger_percent():
-    def __init__(self, param):
-        # param = [PB_values, up or down] ,  PB_values: 0~1
+    def __init__(self, param, period=20):
+        # param = [PB_values, up or down] ,  PB_values: 0~100
         self.param = param
         self.first = False
+        self.period = period
 
     def default_setting(self, price_df):
         if self.first == False:
             self.first = True
-            MA20 = price_df['close'].rolling(window=20).mean()
-            stddev = price_df['close'].rolling(window=20).std()
+            MA20 = price_df['close'].rolling(window=self.period).mean()
+            stddev = price_df['close'].rolling(window=self.period).std()
             upper = MA20 + stddev * 2
             lower = MA20 - stddev * 2
-            self.PB = (price_df['close'] - lower) / (upper - lower)
+            self.PB = (price_df['close'] - lower) / (upper - lower) * 100
             
     def condition(self, date):
         if self.param[1] == 'up':
             return self.PB[date] > self.param[0]
         elif self.param[1] == 'down':
             return self.PB[date] < self.param[0]
+
+
+class no_deal():
+    def __init__(self):
+        self.first = False
+
+    def default_setting(self, price_df):
+        if self.first == False:
+            self.first = True
+    
+    def condition(self, date):
+        return False
