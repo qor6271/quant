@@ -108,7 +108,7 @@ class single_Backtest():
                     self.make_balance(yesterday, today, 'buy', self.price_single[self.trading_timing][today])
             elif (sell_condition or (self.price_single['low'][sell_date]/self.high - 1 < self.stop_loss)) and self.stock_number != 0:
                 if self.price_single['low'][sell_date]/self.high - 1 < self.stop_loss:
-                    self.make_balance(yesterday, today, 'sell', self.high * 0.9)
+                    self.make_balance(yesterday, today, 'sell', self.high * (1+self.stop_loss))
                 else:
                     self.make_balance(yesterday, today, 'sell', self.price_single[self.trading_timing][today])
             else:
