@@ -95,6 +95,10 @@ post_message(myToken, '#coin', 'autotrade start')
 
 start_time = datetime.datetime.now()
 
+#buy = 50
+#sell = 20~50
+#max_loss = 10
+
 while True:
     try:
         now = datetime.datetime.now()
@@ -103,10 +107,11 @@ while True:
         if start_time != new_time:
             start_time = new_time
             krw = get_balance('KRW')
+            btc = get_balance('BTC')
             if krw > 5000:
                 df = get_ohlcv('KRW-BTC')
-                buy_bp = bollinger_percent(param=[80,'up'], period = 15)
-                buy_mfi = money_flow_index(param = [80,'up'], period = 10)
+                buy_bp = bollinger_percent(param=[buy,'up'], period = 15)
+                buy_mfi = money_flow_index(param = [buy,'up'], period = 10)
                 buy_bp.default_setting(df)
                 buy_mfi.default_setting(df)
                 if buy_bp.condition(date=start_time - datetime.timedelta(days=1)) and buy_mfi.condition(date=start_time - datetime.timedelta(days=1)):
@@ -114,15 +119,27 @@ while True:
                     high_price = pyupbit.get_current_price('KRW-BTC')
                     post_message(myToken, '#coin', 'buying complete')
                     time.sleep(1)
-                    krw_new = get_balance("KRW")
-                    btc_new = get_balance('BTC')
-                    post_message(myToken, '#coin', f'balance KRW : {krw_new}, BTC : {btc_new}')
-        
-        btc = get_balance('BTC')
+                    krw = get_balance("KRW")
+                    btc = get_balance('BTC')
+                    post_message(myToken, '#coin', f'balance KRW : {krw}, BTC : {btc}')
+            elif btc > 0.00008:
+                df = get_ohlcv('KRW-BTC')
+                sell_bp = bollinger_percent(param=[sell,'down'], period = 15)
+                sell_mfi = money_flow_index(param = [sell,'down'], period = 10)
+                sell_bp.default_setting(df)
+                sell_mfi.default_setting(df)
+                if sell_bp.condition(date=start_time - datetime.timedelta(days=1)) and sell_mfi.condition(date=start_time - datetime.timedelta(days=1)):
+                    upbit.sell_market_order("KRW-BTC", btc)
+                    post_message(myToken, '#coin', 'selling complete')
+                    time.sleep(1)
+                    krw = get_balance("KRW")
+                    btc = get_balance('BTC')
+                    post_message(myToken, '#coin', f'balance KRW : {krw}, BTC : {btc}')
+
         if btc > 0.00008:
             new_price = pyupbit.get_current_price('KRW-BTC')
             high_price = max(high_price, new_price)
-            if high_price * 0.8 > new_price:
+            if high_price * (1 - max_loss/100) > new_price:
                 upbit.sell_market_order("KRW-BTC", btc)
                 post_message(myToken, '#coin', 'selling complete')
                 time.sleep(1)
